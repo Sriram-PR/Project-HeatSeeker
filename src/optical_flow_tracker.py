@@ -5,14 +5,13 @@ import os
 import cv2
 import numpy as np
 
-# --- Attempt to Import from Phase 1 ---
 try:
     from data_loader import (DATASET_BASE_PATH,
                              get_sequence_frames,
                              parse_ground_truth,
                              convert_corners_to_bbox,
                              load_frame,
-                             preprocess_frame_pipeline, # Reuse preprocessing
+                             preprocess_frame_pipeline,
                              normalize_frame)
 except ImportError:
     print("="*60+"\nERROR: Could not import from data_loader.py.\n"+"="*60); exit()
@@ -264,11 +263,11 @@ def track_sequence_optical_flow(sequence_name, visualize=True):
 # --- Main Execution ---
 if __name__ == "__main__":
     print("--- Optical Flow Tracker Demonstration ---")
-    # Verify data path is set
+    
     if 'PASTE_YOUR_FULL_LTIR_DATASET_PATH_HERE' in DATASET_BASE_PATH or not os.path.isdir(DATASET_BASE_PATH):
          print("="*60+"\n!!! ERROR: Set DATASET_BASE_PATH in data_loader.py !!!\n"+"="*60); exit()
 
-    sequence_to_track = '8_car' # Try '8_crossing', '8_selma'
+    sequence_to_track = '8_car'
 
     # Run the Optical Flow tracker
     # Note: This currently doesn't pass detector params, uses defaults inside function

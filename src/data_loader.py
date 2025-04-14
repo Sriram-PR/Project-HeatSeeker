@@ -7,10 +7,6 @@ import os
 import glob
 
 # --- Configuration ---
-# >>> IMPORTANT: Set this to the actual path on your system <<<
-# Example for Windows: DATASET_BASE_PATH = r'C:\datasets\ltir_v1_0_8bit_16bit'
-# Example for Linux/macOS: DATASET_BASE_PATH = '/home/user/datasets/ltir_v1_0_8bit_16bit'
-# You might want to remove this later and pass the path as an argument for better modularity
 DATASET_BASE_PATH = r'./data/ltir_v1_0_8bit_16bit'
 
 # --- Loading Functions (Adapted from eda.py) ---

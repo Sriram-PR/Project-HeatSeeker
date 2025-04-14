@@ -4,16 +4,11 @@
 import os
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt # For plotting results
+import matplotlib.pyplot as plt
 
-# --- Attempt to Import ---
 try:
-    # Need the OF tracking function and its dependencies
     from optical_flow_tracker import track_sequence_optical_flow
-    # Need evaluation helpers (IoU, CLE) - copy or import from tracker/evaluate_tracker
-    from tracker import calculate_iou # Assuming it's in tracker.py
-    # Need calculate_cle (copy from evaluate_tracker.py or define here)
-    # Need base path config
+    from tracker import calculate_iou
     from data_loader import DATASET_BASE_PATH
 except ImportError as e:
     print("="*60)
@@ -98,7 +93,7 @@ def plot_success_curve(all_sequence_results, title="Success Plot - Optical Flow"
     plt.axis([0, 1, 0, 1])
     auc = np.trapz(success_rates_at_threshold, thresholds)
     plt.text(0.1, 0.1, f"AUC: {auc:.3f}", fontsize=12)
-    plt.legend() # Show label
+    plt.legend()
     print(f"\nSuccess Plot AUC (Area Under Curve) for Optical Flow: {auc:.4f}")
     plt.show()
 
@@ -107,20 +102,23 @@ if __name__ == "__main__":
     print("--- Phase 4: Evaluation for OPTICAL FLOW Tracker ---") # Modified Title
 
     # 1. Define Tuning and Test Sets (Use the SAME split as for Kalman)
-    #    CRITICAL: Ensure these lists EXACTLY match the ones used for Kalman evaluation for fair comparison.
-    all_sequences = [ # Reference list
+    all_sequences = [
         '8_birds', '8_car', '8_crossing', '8_crouching', '8_crowd',
         '8_depthwise_crossing', '8_garden', '8_hiding', '8_horse', '8_jacket',
         '8_mixed_distractors', '8_quadrocopter', '8_quadrocopter2',
         '8_rhino_behind_tree', '8_running_rhino', '8_saturated', '8_selma',
         '8_soccer', '8_street', '8_trees'
     ]
-    # >>>>> PASTE YOUR ACTUAL LISTS HERE <<<<<
-    tuning_sequences = ['8_car', '8_crossing', '8_crouching', '8_crowd', '8_depthwise_crossing',
-                        '8_garden', '8_hiding', '8_horse', '8_jacket', '8_mixed_distractors',
-                        '8_quadrocopter', '8_quadrocopter2', '8_rhino_behind_tree', '8_running_rhino'] # Example
-    test_sequences = ['8_birds', '8_saturated', '8_selma', '8_soccer', '8_street', '8_trees'] # Example
-    # >>>>> END PASTE <<<<<
+    
+    tuning_sequences = [
+    '8_rhino_behind_tree', '8_garden', '8_hiding', '8_saturated',
+    '8_car', '8_crowd', '8_birds', '8_depthwise_crossing',
+    '8_quadrocopter', '8_selma', '8_trees', '8_soccer'
+    ]
+    test_sequences = [
+    '8_running_rhino', '8_horse', '8_mixed_distractors', '8_street',
+    '8_crouching', '8_crossing', '8_jacket', '8_quadrocopter2'
+    ]
 
     print(f"Using Tuning Set: {tuning_sequences}")
     print(f"Using Test Set: {test_sequences}")
@@ -138,7 +136,6 @@ if __name__ == "__main__":
     print("\nNOTE: Evaluating Optical Flow tracker using its internally defined parameters.")
     print("(Refactor track_sequence_optical_flow to accept parameters for rigorous tuning/comparison)")
 
-    # Verify data path is set
     if 'PASTE_YOUR_FULL_LTIR_DATASET_PATH_HERE' in DATASET_BASE_PATH or not os.path.isdir(DATASET_BASE_PATH):
          print("="*60+"\n!!! ERROR: Set DATASET_BASE_PATH in data_loader.py !!!\n"+"="*60); exit()
 

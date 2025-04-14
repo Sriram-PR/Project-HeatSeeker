@@ -5,7 +5,6 @@ import os
 import cv2
 import numpy as np
 
-# --- Attempt to Import from Previous Phases ---
 try:
     from data_loader import (DATASET_BASE_PATH,
                              get_sequence_frames,
@@ -18,7 +17,6 @@ except ImportError:
     print("="*60+"\nERROR: Could not import from data_loader.py.\n"+"="*60); exit()
 
 try:
-    # Import the MASK PROCESSING function and its default parameters
     from motion_detector import (process_fg_mask,
                                  DEFAULT_MIN_CONTOUR_AREA,
                                  DEFAULT_MAX_CONTOUR_AREA,
@@ -183,7 +181,7 @@ def track_sequence(sequence_name, visualize=True):
 
 # --- Example Usage ---
 if __name__ == "__main__":
-    # Check data_loader path
+    
     if 'PASTE_YOUR_FULL_LTIR_DATASET_PATH_HERE' in DATASET_BASE_PATH or not os.path.isdir(DATASET_BASE_PATH):
          print("="*60+"\n!!! ERROR: Set DATASET_BASE_PATH in data_loader.py !!!\n"+"="*60); exit()
 
@@ -193,8 +191,6 @@ if __name__ == "__main__":
 
     if tracked_results:
         print(f"\nTracking complete. Generated {len(tracked_results)} tracked boxes.")
-        # Basic check
         print(f"GT boxes available: {len(gt_results)}")
-        # Next phase: Evaluate tracked_results against gt_results
     else:
         print("Tracking failed.")

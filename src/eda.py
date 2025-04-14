@@ -9,10 +9,7 @@ import glob # For finding files easily
 import matplotlib.pyplot as plt # Added for potential future plotting
 
 # --- Configuration ---
-# >>> IMPORTANT: Set this to the actual path on your system <<<
-# Example for Windows: DATASET_BASE_PATH = r'C:\datasets\ltir_v1_0_8bit_16bit'
-# Example for Linux/macOS: DATASET_BASE_PATH = '/home/user/datasets/ltir_v1_0_8bit_16bit'
-DATASET_BASE_PATH = r'./data/ltir_v1_0_8bit_16bit' # Use 'r' for raw string on Windows
+DATASET_BASE_PATH = r'./data/ltir_v1_0_8bit_16bit'
 
 # --- Utility Functions ---
 
@@ -142,13 +139,9 @@ if __name__ == "__main__":
         exit()
 
     # Check if number of ground truth entries matches frames
-    # Note: Some VOT sequences might have GT starting/ending differently,
-    # but for basic exploration, we assume 1-to-1 for now.
     if len(gt_corners_list) != len(frame_paths):
         print(f"Warning: Number of ground truth entries ({len(gt_corners_list)}) "
               f"does not match number of frames ({len(frame_paths)}).")
-        # Decide how to handle this - stop, or just proceed with available data?
-        # For now, let's only use frames that have corresponding GT
         min_len = min(len(frame_paths), len(gt_corners_list))
         frame_paths = frame_paths[:min_len]
         gt_corners_list = gt_corners_list[:min_len]

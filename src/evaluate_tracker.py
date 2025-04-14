@@ -4,20 +4,16 @@
 import os
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt # For plotting results
+import matplotlib.pyplot as plt
 
-# --- Attempt to Import from Previous Phases ---
 try:
-    # Need the main tracking function and its dependencies
-    from tracker import track_sequence, calculate_iou # Reuse IoU calculation
-    # Also need the detector function definition to pass it to the tracker
-    from motion_detector import (process_fg_mask, # Assuming MOG2 approach
+    from tracker import track_sequence, calculate_iou
+    from motion_detector import (process_fg_mask,
                                  DEFAULT_MIN_CONTOUR_AREA,
                                  DEFAULT_MAX_CONTOUR_AREA,
                                  DEFAULT_MORPH_KERNEL_SIZE,
                                  DEFAULT_MORPH_OPEN_ITERATIONS,
                                  DEFAULT_MORPH_CLOSE_ITERATIONS)
-    # Need base path for verification
     from data_loader import DATASET_BASE_PATH
 except ImportError as e:
     print("="*60)
@@ -107,7 +103,7 @@ def evaluate_sequence(sequence_name, tracked_bboxes, ground_truth_bboxes):
         "avg_iou": average_iou,
         "avg_cle": average_cle,
         "success_rate": success_rate,
-        "iou_per_frame": iou_scores, # Store per-frame for potential plotting
+        "iou_per_frame": iou_scores,
         "cle_per_frame": cle_scores
     }
     return results
@@ -156,10 +152,8 @@ if __name__ == "__main__":
     print("--- Phase 4: Tracker Evaluation ---")
 
     # 1. Define Tuning and Test Sets
-    #    CRITICAL: Replace these placeholders with your actual split!
     #    Use the list of 20 sequence names from Phase 0.
-    #    Example Split (MAKE YOUR OWN ACTUAL SPLIT):
-    all_sequences = [ # Assuming these are the 20 8-bit sequences
+    all_sequences = [
         '8_birds', '8_car', '8_crossing', '8_crouching', '8_crowd',
         '8_depthwise_crossing', '8_garden', '8_hiding', '8_horse', '8_jacket',
         '8_mixed_distractors', '8_quadrocopter', '8_quadrocopter2',
@@ -171,12 +165,15 @@ if __name__ == "__main__":
     # tuning_sequences = all_sequences[:14] # Example 70%
     # test_sequences = all_sequences[14:]  # Example 30%
 
-    # >>>>> PASTE YOUR ACTUAL LISTS HERE <<<<<
-    tuning_sequences = ['8_car', '8_crossing', '8_crouching', '8_crowd', '8_depthwise_crossing',
-                        '8_garden', '8_hiding', '8_horse', '8_jacket', '8_mixed_distractors',
-                        '8_quadrocopter', '8_quadrocopter2', '8_rhino_behind_tree', '8_running_rhino'] # Example
-    test_sequences = ['8_birds', '8_saturated', '8_selma', '8_soccer', '8_street', '8_trees'] # Example
-    # >>>>> END PASTE <<<<<
+    tuning_sequences = [
+    '8_rhino_behind_tree', '8_garden', '8_hiding', '8_saturated',
+    '8_car', '8_crowd', '8_birds', '8_depthwise_crossing',
+    '8_quadrocopter', '8_selma', '8_trees', '8_soccer'
+    ]
+    test_sequences = [
+    '8_running_rhino', '8_horse', '8_mixed_distractors', '8_street',
+    '8_crouching', '8_crossing', '8_jacket', '8_quadrocopter2'
+    ]
 
     print(f"Tuning Set Sequences: {tuning_sequences}")
     print(f"Test Set Sequences: {test_sequences}")
@@ -196,10 +193,9 @@ if __name__ == "__main__":
         "open_iterations": DEFAULT_MORPH_OPEN_ITERATIONS,
         "close_iterations": DEFAULT_MORPH_CLOSE_ITERATIONS
     }
-    # Note: MOG2 parameters (History, VarThreshold) are inside tracker.py's track_sequence now
+    # Note: MOG2 parameters (History, VarThreshold) are inside tracker.py's track_sequence
     # Note: Kalman parameters (Noise, IOU Threshold) are also inside tracker.py
 
-    # Verify data path is set
     if 'PASTE_YOUR_FULL_LTIR_DATASET_PATH_HERE' in DATASET_BASE_PATH or not os.path.isdir(DATASET_BASE_PATH):
          print("="*60+"\n!!! ERROR: Set DATASET_BASE_PATH in data_loader.py !!!\n"+"="*60); exit()
 
