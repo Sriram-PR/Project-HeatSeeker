@@ -8,9 +8,8 @@ import traceback
 import pandas as pd
 import motmetrics as mm
 import numpy as np
-import cv2 # Needed for thread info
+import cv2
 
-# Optimization imports
 try:
     from skopt import gp_minimize
     from skopt.space import Real, Integer, Categorical
@@ -18,20 +17,18 @@ try:
 except ImportError:
     print("Error: scikit-optimize not installed. Use: pip install scikit-optimize"); exit()
 
-# Import pipeline components
 from config import PipelineConfig
 from data_loader_mot import DatasetLoader
 from pipeline_runner import MotionDetectionPipeline
-from evaluation import calculate_mot_metrics # Import metric calculation helper
+from evaluation import calculate_mot_metrics
 
-# --- Environment Info ---
 print(f"OpenCV Threads: {cv2.getNumThreads()}")
 print(f"motmetrics version: {mm.__version__}")
 try: import skopt; print(f"scikit-optimize version: {skopt.__version__}")
 except Exception: pass
 
 # ============================================
-# ========== Optimization Configuration ==========
+# ======== Optimization Configuration ========
 # ============================================
 param_space = [
     Integer(50, 500, name='min_blob_area'),
@@ -51,29 +48,28 @@ param_names = [space.name for space in param_space]
 OPTIMIZATION_TARGET_METRIC = 'idf1'
 MAXIMIZE_METRIC = True
 
-BASE_PATH = '/kaggle/input/ltir-v1-0-8bit-16bit/ltir_v1_0_8bit_16bit/ltir_v1_0_8bit_16bit' # MODIFY
+BASE_PATH = './data/ltir_v1_0_8bit_16bit/'
 
-TRAINING_SEQUENCES = [ # MODIFY AS NEEDED
+TRAINING_SEQUENCES = [
     '8_car', '8_garden', '8_hiding', '8_saturated', '8_crowd', '8_birds',
     '8_depthwise_crossing', '8_quadrocopter', '8_selma', '8_trees', '8_soccer'
 ]
-VALIDATION_SEQUENCES = [ # MODIFY AS NEEDED
+VALIDATION_SEQUENCES = [
     '8_rhino_behind_tree', '8_running_rhino', '8_horse', '8_mixed_distractors', '8_street',
     '8_crouching', '8_crossing', '8_jacket', '8_quadrocopter2'
 ]
 
 N_OPTIMIZATION_CALLS = 100
 N_INITIAL_RANDOM_POINTS = 20
-ACQUISITION_FUNCTION = 'gp_hedge'
+ACQUISITION_FUNCTION = 'EI'
 RANDOM_STATE_SEED = 42
 
 TIMESTAMP = time.strftime("%Y%m%d-%H%M%S")
 OPTIMIZATION_NAME = f"{OPTIMIZATION_TARGET_METRIC}_optimization"
-OUTPUT_DIR = "output" # Define output directory
+OUTPUT_DIR = "output"
 TRIALS_CSV_PATH = os.path.join(OUTPUT_DIR, f'{OPTIMIZATION_NAME}_trials_{TIMESTAMP}.csv')
 VALIDATION_CSV_PATH = os.path.join(OUTPUT_DIR, f'{OPTIMIZATION_NAME}_validation_{TIMESTAMP}.csv')
 
-# Ensure output directory exists
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # --- Globals ---
@@ -100,14 +96,13 @@ def objective_function(**params):
         except Exception as e:
              print(f"  ERROR: Invalid format for {tuple_param_name}: '{grid_str}'. Using (8, 8). Error: {e}")
              current_params[tuple_param_name] = (8, 8)
-    trial_log.update(current_params) # Log original or converted params
+    trial_log.update(current_params)
 
     print(f"\n--- Trial {optimization_call_count}/{N_OPTIMIZATION_CALLS} ---")
-    # (Optional: print current_params dictionary here)
 
     # --- Create Config ---
     try:
-         config = PipelineConfig(**current_params, iou_threshold=0.3) # Fixed eval IoU
+         config = PipelineConfig(**current_params, iou_threshold=0.3)
     except Exception as e:
          print(f"  ERROR: Failed to create PipelineConfig: {e}"); traceback.print_exc()
          trial_log['error_creating_config'] = str(e)[:200]
@@ -126,14 +121,15 @@ def objective_function(**params):
             if not data.frame_paths: error_msg = "No frames"
             elif data.gt_corners is None or not any(gt is not None for gt in data.gt_bboxes_with_id): error_msg = "No valid GT"
             if error_msg:
-                pass # print(f"    Warning: {error_msg} for {seq_name}. Skipping.")
+                print(f"    Warning: {error_msg} for {seq_name}. Skipping.")
+                pass
             else:
                 pipeline = MotionDetectionPipeline(data, config)
                 seq_frame_updates, _ = pipeline.run(save_gif_path=None, save_csv_path=None) # NO GIF/CSV during opt
                 if seq_frame_updates:
                     for frame_data in seq_frame_updates: combined_accumulator.update(*frame_data)
                     seq_success = True; total_frames_processed += len(seq_frame_updates)
-                # else: error_msg = "Pipeline yielded no frame data" # Can be verbose
+                else: error_msg = "Pipeline yielded no frame data" # Can be verbose
         except Exception as e:
             error_msg = f"Pipeline Run ERROR: {e}"; traceback.print_exc()
         if error_msg: sequences_with_errors.append(f"{seq_name}:{error_msg[:50]}") # Log truncated error
@@ -175,7 +171,7 @@ def objective_function(**params):
     if optimization_call_count > 0 and optimization_call_count % 10 == 0:
          try:
              pd.DataFrame(optimization_trials_data).to_csv(TRIALS_CSV_PATH, index=False, float_format='%.5f')
-             # print(f"  (Saved intermediate log to {TRIALS_CSV_PATH})") # Can be verbose
+             print(f"  (Saved intermediate log to {TRIALS_CSV_PATH})")
          except Exception as e: print(f"  (Warning: Failed to save intermediate log: {e})")
     return score
 
@@ -183,7 +179,6 @@ def objective_function(**params):
 if __name__ == "__main__":
     start_time_main = time.time()
     print("="*60 + "\n Bayesian Optimization Started\n" + "="*60)
-    # (Print config details - Target Metric, Params, Datasets, Outputs...)
 
     # --- Run Optimization ---
     result = gp_minimize(func=objective_function, dimensions=param_space,
@@ -215,7 +210,6 @@ if __name__ == "__main__":
     if optimization_trials_data:
         try:
             trials_df = pd.DataFrame(optimization_trials_data)
-            # (Optional: Reorder columns for better readability)
             trials_df.to_csv(TRIALS_CSV_PATH, index=False, float_format='%.5f')
             print(f"\nSaved FINAL detailed optimization trials log to: {TRIALS_CSV_PATH}")
         except Exception as e: print(f"ERROR saving final trials log: {e}")
@@ -269,7 +263,6 @@ if __name__ == "__main__":
     if validation_results:
         try:
             val_df = pd.DataFrame(validation_results)
-            # (Optional: Reorder validation columns)
             val_df.to_csv(VALIDATION_CSV_PATH, index=False, float_format='%.5f')
             print(f"\nSaved detailed validation results to: {VALIDATION_CSV_PATH}")
         except Exception as e: print(f"ERROR saving validation log: {e}")
