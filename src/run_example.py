@@ -25,31 +25,46 @@ from evaluation import calculate_mot_metrics, per_frame_analysis
 # --- Configuration for this Example Run ---
 
 # 1. Dataset Information
-BASE_PATH = './data/ltir_v1_0_8bit_16bit/' # MODIFY AS NEEDED
-SEQUENCE_NAME = '8_car' # MODIFY to the sequence you want to test
+BASE_PATH = './data/ltir_v1_0_8bit_16bit/'
+SEQUENCE_NAME = '8_birds'
 
 # 2. Fixed Pipeline Parameters (Example Values - NOT OPTIMIZED)
 #    Use values known to give some results, or defaults.
+# EXAMPLE_CONFIG = PipelineConfig(
+#     min_blob_area=100,
+#     mog2_history=300,
+#     mog2_varThreshold=25.0,
+#     morph_kernel_size=5,
+#     max_misses=6,
+#     association_threshold=50.0,
+#     Q=0.05,                     # Process noise
+#     R=50.0,                     # Measurement noise
+#     gaussian_ksize=5,
+#     clahe_clip_limit=2.0,
+#     clahe_tile_grid_size=(8, 8),
+#     iou_threshold=0.3           # IoU threshold for MOT evaluation matching
+# )
+
 EXAMPLE_CONFIG = PipelineConfig(
-    min_blob_area=100,
-    mog2_history=300,
-    mog2_varThreshold=25.0,
-    morph_kernel_size=5,
-    max_misses=6,
-    association_threshold=50.0,
-    Q=0.05,                     # Process noise
-    R=50.0,                     # Measurement noise
-    gaussian_ksize=5,
-    clahe_clip_limit=2.0,
+    min_blob_area=493,
+    mog2_history=723,
+    mog2_varThreshold=99.60038,
+    morph_kernel_size=3,
+    max_misses=10,
+    association_threshold=142.36825,
+    Q=0.77262,                     # Process noise
+    R=64.25058,                     # Measurement noise
+    gaussian_ksize=3,
+    clahe_clip_limit=1.57559,
     clahe_tile_grid_size=(8, 8),
     iou_threshold=0.3           # IoU threshold for MOT evaluation matching
 )
 
 # 3. Output Settings
-OUTPUT_DIR = "output_example" # Save outputs to a separate directory
+OUTPUT_DIR = "output_example"
 SAVE_CSV = True
-SAVE_GIF = True # Set to False to speed up if visualization isn't needed
-SHOW_INLINE_EVERY = None # Set to e.g., 50 to show frames with Matplotlib, None to disable
+SAVE_GIF = True
+SHOW_INLINE_EVERY = None
 
 # --- Main Execution Block ---
 if __name__ == "__main__":
@@ -60,7 +75,6 @@ if __name__ == "__main__":
     print(f"Sequence: {SEQUENCE_NAME}")
     print(f"Base Path: {BASE_PATH}")
     print(f"Using Fixed Parameters:")
-    # Print the example configuration nicely
     for key, value in vars(EXAMPLE_CONFIG).items():
          print(f"  - {key}: {value}")
     print("-" * 60)
@@ -71,7 +85,6 @@ if __name__ == "__main__":
         print(f"Output directory: '{OUTPUT_DIR}'")
     except OSError as e:
         print(f"Error creating output directory {OUTPUT_DIR}: {e}. Outputs might fail.")
-        # Continue execution, but saving might fail
 
     # --- Load Data ---
     print("Loading data...")
