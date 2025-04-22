@@ -1,0 +1,2 @@
+frame,track_id,x,y,w,h,gt_x,gt_y,gt_w,gt_h
+0,1,0,0,320,256,245,220,33,28
