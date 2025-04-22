@@ -42,7 +42,8 @@ class MotionDetectionPipeline:
         num_frames = len(self.data)
         # print(f"Starting pipeline run for {self.data.sequence_name} ({num_frames} frames)...") # Moved to optimize.py
 
-        for idx in range(num_frames): # Consider using tqdm here if run standalone
+        # for idx in range(num_frames): # Without tqdm
+        for idx in tqdm(range(num_frames), desc=f"Pipeline:{self.data.sequence_name}", unit="frame", leave=True):
             frame, bit_depth = self.data.load_frame(idx)
             if frame is None: continue
 
