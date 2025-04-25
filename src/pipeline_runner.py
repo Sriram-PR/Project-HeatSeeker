@@ -1,6 +1,3 @@
-"""
-Orchestrates the tracking pipeline for a single sequence.
-"""
 import cv2
 import numpy as np
 import pandas as pd
@@ -8,14 +5,12 @@ from tqdm import tqdm
 import imageio
 import motmetrics as mm
 
-# Import necessary components from other modules
 from config import PipelineConfig
 from data_loader_mot import DatasetLoader
 from preprocessing import preprocess, normalize_image
 from detector import ForegroundDetector
 from multi_tracker import MultiObjectTracker
 from visualization import draw_tracks_on_frame, draw_gt_on_frame, show_frame
-# Note: compute_iou might not be directly needed here if using mm.distances
 
 class MotionDetectionPipeline:
     """Orchestrates the entire motion detection and tracking pipeline."""
@@ -40,7 +35,6 @@ class MotionDetectionPipeline:
         results_for_csv = []
         frame_update_data = []
         num_frames = len(self.data)
-        # print(f"Starting pipeline run for {self.data.sequence_name} ({num_frames} frames)...") # Moved to optimize.py
 
         # for idx in range(num_frames): # Without tqdm
         for idx in tqdm(range(num_frames), desc=f"Pipeline:{self.data.sequence_name}", unit="frame", leave=True):
@@ -93,7 +87,7 @@ class MotionDetectionPipeline:
 
         # --- Save Outputs ---
         if save_gif_path and vis_frames:
-            print(f"    (Saving GIF: {save_gif_path})") # Less verbose saving message
+            print(f"    (Saving GIF: {save_gif_path})")
             try:
                 vis_frames_rgb = [cv2.cvtColor(f, cv2.COLOR_BGR2RGB) for f in vis_frames]
                 imageio.mimsave(save_gif_path, vis_frames_rgb, fps=10)
@@ -102,11 +96,10 @@ class MotionDetectionPipeline:
 
         results_df = pd.DataFrame(results_for_csv)
         if save_csv_path:
-            # print(f"    (Saving CSV: {save_csv_path})") # Less verbose saving message
+            print(f"    (Saving CSV: {save_csv_path})")
             try:
                 results_df.to_csv(save_csv_path, index=False, float_format='%.2f')
             except Exception as e:
                 print(f"    Error saving CSV {save_csv_path}: {e}")
 
-        # print(f"Pipeline run finished for {self.data.sequence_name}.") # Moved to optimize.py
         return frame_update_data, results_df

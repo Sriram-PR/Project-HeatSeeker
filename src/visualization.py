@@ -1,10 +1,7 @@
-"""
-Functions for drawing tracks and ground truth on frames and displaying them.
-"""
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-from ukf_tracker import UKFTrack # Import the single track class
+from ukf_tracker import UKFTrack
 
 def draw_tracks_on_frame(frame: np.ndarray, tracks: list[UKFTrack]) -> np.ndarray:
     """Draws bounding boxes and IDs for active tracks on a frame."""

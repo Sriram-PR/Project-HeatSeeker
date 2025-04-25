@@ -1,9 +1,6 @@
-"""
-Foreground object detection using MOG2 and morphological filtering.
-"""
 import cv2
 import numpy as np
-from config import PipelineConfig # Import configuration class
+from config import PipelineConfig
 
 class ForegroundDetector:
     """

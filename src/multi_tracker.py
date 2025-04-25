@@ -1,6 +1,3 @@
-"""
-Manages multiple UKF tracks and performs data association using Hungarian algorithm.
-"""
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 from config import PipelineConfig   # Import configuration

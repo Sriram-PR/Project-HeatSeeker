@@ -1,10 +1,7 @@
-"""
-Defines the UKF state transition/measurement functions and the UKFTrack class.
-"""
 import numpy as np
 from filterpy.kalman import UnscentedKalmanFilter as UKF
 from filterpy.kalman import MerweScaledSigmaPoints
-from config import PipelineConfig # Import configuration class
+from config import PipelineConfig
 
 # ========== UKF State Transition and Measurement Functions ==========
 def fx(x: np.ndarray, dt: float) -> np.ndarray:

@@ -1,12 +1,7 @@
-# File: eda.py
-# Purpose: Exploratory Data Analysis - Load LTIR sequence data, parse ground truth,
-#          and visualize the first frame with its annotation.
-
 import cv2
 import numpy as np
 import os
-import glob # For finding files easily
-import matplotlib.pyplot as plt # Added for potential future plotting
+import glob
 
 # --- Configuration ---
 DATASET_BASE_PATH = r'./data/ltir_v1_0_8bit_16bit'
@@ -74,7 +69,7 @@ def convert_corners_to_bbox(corners):
 def load_frame(frame_path):
     """Loads a single frame image, attempting to determine bit depth."""
     # Try loading as anydepth first
-    frame = cv2.imread(frame_path, cv2.IMREAD_UNCHANGED) # More general loader
+    frame = cv2.imread(frame_path, cv2.IMREAD_UNCHANGED)
 
     if frame is None:
         print(f"Error: Failed to load frame '{frame_path}'")
@@ -83,11 +78,9 @@ def load_frame(frame_path):
     # Check the depth
     if frame.dtype == np.uint8:
         bit_depth = 8
-        # Ensure it's treated as grayscale if it has only 2 dimensions
         if len(frame.shape) == 2:
-             pass # Already grayscale
+             pass
         elif len(frame.shape) == 3 and frame.shape[2] == 3:
-             # Convert to grayscale if loaded as color (unlikely for LTIR but safe)
              print(f"Warning: Frame {frame_path} loaded as color, converting to grayscale.")
              frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         else:
@@ -95,35 +88,26 @@ def load_frame(frame_path):
 
     elif frame.dtype == np.uint16:
         bit_depth = 16
-        # Ensure it's grayscale (should be for 16-bit thermal)
         if len(frame.shape) != 2:
              print(f"Warning: Expected 16-bit image {frame_path} to be grayscale, but shape is {frame.shape}")
-             # Attempt to handle common cases if necessary, otherwise raise error or return None
     else:
         print(f"Warning: Unsupported dtype {frame.dtype} for frame '{frame_path}'. Attempting grayscale load.")
-        # Fallback to grayscale load
         frame = cv2.imread(frame_path, cv2.IMREAD_GRAYSCALE)
         if frame is None:
              print(f"Error: Fallback grayscale load failed for '{frame_path}'")
              return None, None
-        bit_depth = 8 # Assume 8-bit after fallback
+        bit_depth = 8
 
     return frame, bit_depth
 
-# --- Verification Script / Main Execution ---
 if __name__ == "__main__":
     # 1. Choose a sequence to test
     test_sequence_name = '8_car' # Change this to test other sequences
     print(f"--- Testing Sequence: {test_sequence_name} ---")
 
-    # Basic check if base path is set
     if 'PASTE_YOUR_FULL_LTIR_DATASET_PATH_HERE' in DATASET_BASE_PATH or not os.path.isdir(DATASET_BASE_PATH):
-         print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-         print("!!! ERROR: Please set the DATASET_BASE_PATH variable   !!!")
-         print("!!! in the eda.py script to your actual dataset location !!!")
-         print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+         print("ERROR: Please set the DATASET_BASE_PATH variable in the eda.py script to your actual dataset location!")
          exit()
-
 
     # 2. Get frame paths
     frame_paths = get_sequence_frames(DATASET_BASE_PATH, test_sequence_name)
@@ -147,7 +131,7 @@ if __name__ == "__main__":
         gt_corners_list = gt_corners_list[:min_len]
         print(f"Processing the first {min_len} frames/GT entries.")
 
-    if not frame_paths: # Check if we have anything left to process
+    if not frame_paths:
          print("No frames left to process after aligning with ground truth.")
          exit()
 
@@ -172,24 +156,21 @@ if __name__ == "__main__":
     print(f"First GT corners: {first_gt_corners}")
     print(f"First GT bbox (x, y, w, h): {first_gt_bbox}")
 
-
     # 6. Prepare Frame for Display (Handle Grayscale / 16-bit)
     display_frame = None
-    if len(first_frame.shape) == 2: # Grayscale (Could be 8-bit or 16-bit)
+    if len(first_frame.shape) == 2:
         if detected_bit_depth == 16:
-            # Normalize 16-bit to 0-255 for display
             print("Normalizing 16-bit frame for display.")
             normalized_frame = cv2.normalize(first_frame, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
-            display_frame = cv2.cvtColor(normalized_frame, cv2.COLOR_GRAY2BGR) # Convert to color for drawing
-        else: # 8-bit grayscale
-            display_frame = cv2.cvtColor(first_frame, cv2.COLOR_GRAY2BGR) # Convert to color for drawing
-    elif len(first_frame.shape) == 3: # Should technically not happen often with LTIR
+            display_frame = cv2.cvtColor(normalized_frame, cv2.COLOR_GRAY2BGR)
+        else:
+            display_frame = cv2.cvtColor(first_frame, cv2.COLOR_GRAY2BGR)
+    elif len(first_frame.shape) == 3:
          print("Warning: Frame appears to be color, displaying as is.")
          display_frame = first_frame.copy()
     else:
          print("Error: Cannot determine frame format for display.")
          exit()
-
 
     # 7. Draw the bounding box on the display frame
     if display_frame is not None and first_gt_bbox is not None:
@@ -201,7 +182,7 @@ if __name__ == "__main__":
         cv2.imshow(f"First Frame - {test_sequence_name}", display_frame)
         print("\nShowing the first frame with the ground truth bounding box.")
         print("Press any key to exit.")
-        cv2.waitKey(0) # Wait indefinitely until a key is pressed
+        cv2.waitKey(0)
         cv2.destroyAllWindows()
     else:
         print("Could not display frame.")

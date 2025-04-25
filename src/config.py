@@ -1,8 +1,3 @@
-"""
-Configuration class for the object tracking pipeline.
-"""
-import numpy as np
-
 class PipelineConfig:
     """
     Holds configuration parameters for the entire tracking pipeline.
@@ -24,7 +19,7 @@ class PipelineConfig:
         R: float = 70.0,
 
         # --- Evaluation ---
-        iou_threshold: float = 0.5, # Note: This might be specific to evaluation, consider placement
+        iou_threshold: float = 0.5,
 
         # --- Preprocessing (Gaussian + CLAHE) ---
         gaussian_ksize: int = 5,

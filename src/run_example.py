@@ -1,12 +1,3 @@
-"""
-Example script to run the modular tracking pipeline on a single sequence.
-
-This script demonstrates how to use the defined classes (Config, DataLoader,
-PipelineRunner, etc.) to process one sequence, save outputs (CSV and optionally GIF),
-and calculate MOT metrics if ground truth is available. It uses a fixed
-set of parameters defined within this script.
-"""
-
 import os
 import time
 import pandas as pd
@@ -52,12 +43,12 @@ EXAMPLE_CONFIG = PipelineConfig(
     morph_kernel_size=3,
     max_misses=10,
     association_threshold=142.36825,
-    Q=0.77262,                     # Process noise
-    R=64.25058,                     # Measurement noise
+    Q=0.77262,
+    R=64.25058,
     gaussian_ksize=3,
     clahe_clip_limit=1.57559,
     clahe_tile_grid_size=(8, 8),
-    iou_threshold=0.3           # IoU threshold for MOT evaluation matching
+    iou_threshold=0.3
 )
 
 # 3. Output Settings
@@ -110,7 +101,6 @@ if __name__ == "__main__":
     print("Initializing pipeline...")
     pipeline = MotionDetectionPipeline(data_loader, EXAMPLE_CONFIG)
 
-    # Define output paths for this specific run
     timestamp = time.strftime("%Y%m%d-%H%M%S")
     gif_output_path = os.path.join(OUTPUT_DIR, f"{SEQUENCE_NAME}_example_{timestamp}.gif") if SAVE_GIF else None
     csv_output_path = os.path.join(OUTPUT_DIR, f"{SEQUENCE_NAME}_example_{timestamp}.csv") if SAVE_CSV else None
@@ -118,7 +108,6 @@ if __name__ == "__main__":
     print("Running pipeline...")
     start_run_time = time.time()
     try:
-        # Execute the pipeline
         frame_update_data, results_df = pipeline.run(
             show_inline_every=SHOW_INLINE_EVERY,
             save_gif_path=gif_output_path,
@@ -173,8 +162,3 @@ if __name__ == "__main__":
         if SAVE_CSV and not results_df.empty:
              print("\n--- Simple Analysis based on CSV output (Tracks Only) ---")
              _ = per_frame_analysis(results_df)
-
-
-    print("\n" + "="*60)
-    print(" Example Run Script Finished")
-    print("="*60)

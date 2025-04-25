@@ -1,13 +1,8 @@
-"""
-Bayesian Optimization script for tuning the Object Tracking Pipeline.
-(GIF saving disabled during optimization)
-"""
 import os
 import time
 import traceback
 import pandas as pd
 import motmetrics as mm
-import numpy as np
 import cv2
 
 try:
@@ -27,9 +22,6 @@ print(f"motmetrics version: {mm.__version__}")
 try: import skopt; print(f"scikit-optimize version: {skopt.__version__}")
 except Exception: pass
 
-# ============================================
-# ======== Optimization Configuration ========
-# ============================================
 param_space = [
     Integer(50, 500, name='min_blob_area'),
     Integer(100, 800, name='mog2_history'),
@@ -76,7 +68,6 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 optimization_trials_data = []
 optimization_call_count = 0
 
-# ========== Objective Function ==========
 @use_named_args(param_space)
 def objective_function(**params):
     global optimization_trials_data, optimization_call_count
@@ -175,7 +166,6 @@ def objective_function(**params):
          except Exception as e: print(f"  (Warning: Failed to save intermediate log: {e})")
     return score
 
-# ========== Main Execution ==========
 if __name__ == "__main__":
     start_time_main = time.time()
     print("="*60 + "\n Bayesian Optimization Started\n" + "="*60)

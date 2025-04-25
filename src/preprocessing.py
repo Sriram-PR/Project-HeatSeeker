@@ -1,6 +1,3 @@
-"""
-Image preprocessing functions suitable for thermal imagery.
-"""
 import cv2
 import numpy as np
 
@@ -21,19 +18,17 @@ def normalize_image(img: np.ndarray, bit_depth: int) -> np.ndarray | None:
     if img is None:
         return None
     if bit_depth == 16:
-        # Ensure input is valid before normalize (e.g., handle potential all-zero images if necessary)
         min_val, max_val = img.min(), img.max()
         if max_val > min_val:
              img = cv2.normalize(img, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
         elif max_val == min_val: # Handle flat image
              img = np.full_like(img, int(255.0 * min_val / 65535.0) if min_val > 0 else 0, dtype=np.uint8)
-        else: # Should not happen if input dtype is uint16
+        else:
              img = np.zeros_like(img, dtype=np.uint8)
 
     if len(img.shape) > 2 and img.shape[2] > 1:
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     if img.dtype != np.uint8:
-        # Clip and cast if somehow normalization resulted in different type (unlikely with CV_8U)
         img = np.clip(img, 0, 255).astype(np.uint8)
     return img
 
@@ -55,11 +50,11 @@ def preprocess(img: np.ndarray, bit_depth: int,
     """
     img_norm = normalize_image(img, bit_depth)
     if img_norm is None:
-        # print("Error: Normalization failed in preprocess.") # Can be verbose
+        print("Error: Normalization failed in preprocess.")
         return None
 
     if len(img_norm.shape) > 2 or img_norm.dtype != np.uint8:
-       # print("Warning: Image not 8-bit grayscale after normalization, attempting conversion.")
+       print("Warning: Image not 8-bit grayscale after normalization, attempting conversion.")
        if len(img_norm.shape) > 2: img_norm = cv2.cvtColor(img_norm, cv2.COLOR_BGR2GRAY)
        if img_norm.dtype != np.uint8: img_norm = cv2.normalize(img_norm, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
 

@@ -1,6 +1,3 @@
-"""
-Handles loading image sequences and corresponding ground truth data for MOT evaluation.
-"""
 import os
 import cv2
 import numpy as np

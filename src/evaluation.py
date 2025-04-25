@@ -1,6 +1,3 @@
-"""
-Helper functions for calculating IoU and standard MOT metrics.
-"""
 import numpy as np
 import pandas as pd
 import motmetrics as mm
@@ -38,7 +35,6 @@ def per_frame_analysis(results_df: pd.DataFrame) -> dict:
             analysis_results['mean_iou_csv'] = mean_iou_csv
         else: analysis_results['mean_iou_csv'] = 0
     else: analysis_results['mean_iou_csv'] = 0
-    # Print results within this function if desired, or just return the dict
     print(f"CSV Analysis - Avg Tracks: {analysis_results['avg_tracks_csv']:.2f}, Mean Pair IoU: {analysis_results['mean_iou_csv']:.4f}")
     return analysis_results
 
