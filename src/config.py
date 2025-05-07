@@ -21,8 +21,10 @@ class PipelineConfig:
         # --- Evaluation ---
         iou_threshold: float = 0.5,
 
-        # --- Preprocessing (Gaussian + CLAHE) ---
-        gaussian_ksize: int = 5,
+        # --- Preprocessing (Bilateral + CLAHE) ---
+        bilateral_d: int = 9,
+        bilateral_sigmaColor: float = 75.0,
+        bilateral_sigmaSpace: float = 75.0,
         clahe_clip_limit: float = 2.0,
         clahe_tile_grid_size: tuple[int, int] = (8, 8)
         ):
@@ -42,6 +44,8 @@ class PipelineConfig:
         self.iou_threshold: float = iou_threshold # Used by motmetrics setup
 
         # --- Assign preprocessing params ---
-        self.gaussian_ksize: int = gaussian_ksize // 2 * 2 + 1 # Ensure odd
+        self.bilateral_d: int = bilateral_d
+        self.bilateral_sigmaColor: float = bilateral_sigmaColor
+        self.bilateral_sigmaSpace: float = bilateral_sigmaSpace
         self.clahe_clip_limit: float = clahe_clip_limit
         self.clahe_tile_grid_size: tuple[int, int] = clahe_tile_grid_size

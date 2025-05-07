@@ -43,7 +43,9 @@ class MotionDetectionPipeline:
 
             proc_frame = preprocess(
                 frame, bit_depth,
-                gaussian_ksize=self.config.gaussian_ksize,
+                bilateral_d=self.config.bilateral_d,
+                bilateral_sigmaColor=self.config.bilateral_sigmaColor,
+                bilateral_sigmaSpace=self.config.bilateral_sigmaSpace,
                 clahe_clip_limit=self.config.clahe_clip_limit,
                 clahe_tile_grid_size=self.config.clahe_tile_grid_size
             )

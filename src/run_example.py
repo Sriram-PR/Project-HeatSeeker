@@ -30,23 +30,28 @@ SEQUENCE_NAME = '8_birds'
 #     association_threshold=50.0,
 #     Q=0.05,                     # Process noise
 #     R=50.0,                     # Measurement noise
-#     gaussian_ksize=5,
+#     bilateral_d=5,
+#     bilateral_sigmaColor=50.0,
+#     bilateral_sigmaSpace=50.0,
 #     clahe_clip_limit=2.0,
 #     clahe_tile_grid_size=(8, 8),
 #     iou_threshold=0.3           # IoU threshold for MOT evaluation matching
 # )
 
+# Optimized Parameters
 EXAMPLE_CONFIG = PipelineConfig(
-    min_blob_area=493,
-    mog2_history=723,
-    mog2_varThreshold=99.60038,
-    morph_kernel_size=3,
+    min_blob_area=316,
+    mog2_history=789,
+    mog2_varThreshold=99.29497,
+    morph_kernel_size=5,
     max_misses=10,
-    association_threshold=142.36825,
-    Q=0.77262,
-    R=64.25058,
-    gaussian_ksize=3,
-    clahe_clip_limit=1.57559,
+    association_threshold=74.72605,
+    Q=0.41081,
+    R=132.5273,
+    bilateral_d=7,
+    bilateral_sigmaColor=97.72286,
+    bilateral_sigmaSpace=91.18016,
+    clahe_clip_limit=1.97741,
     clahe_tile_grid_size=(8, 8),
     iou_threshold=0.3
 )

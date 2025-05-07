@@ -33,15 +33,27 @@ def normalize_image(img: np.ndarray, bit_depth: int) -> np.ndarray | None:
     return img
 
 def preprocess(img: np.ndarray, bit_depth: int,
-               gaussian_ksize: int, clahe_clip_limit: float,
+               bilateral_d: int,
+               bilateral_sigmaColor: float,
+               bilateral_sigmaSpace: float,
+               clahe_clip_limit: float,
                clahe_tile_grid_size: tuple[int, int]) -> np.ndarray | None:
     """
-    Applies a preprocessing pipeline: Normalize -> Gaussian Blur -> CLAHE.
+    Applies a preprocessing pipeline: Normalize -> Bilateral Filter -> CLAHE.
 
     Args:
         img: The input image (NumPy array, possibly 16-bit).
         bit_depth: The original bit depth of the image (8 or 16).
-        gaussian_ksize: Kernel size for Gaussian blur (must be odd).
+        bilateral_d: Diameter of each pixel neighborhood for Bilateral Filter.
+                     A larger value means that farther pixels will influence each other.
+                     If it is non-positive, it is computed from sigmaSpace.
+        bilateral_sigmaColor: Filter sigma in the color space. A larger value means that
+                              farther colors within the pixel neighborhood (see sigmaSpace)
+                              will be mixed together, resulting in larger areas of
+                              semi-equal color.
+        bilateral_sigmaSpace: Filter sigma in the coordinate space. A larger value means
+                              that farther pixels will influence each other as long as their
+                              colors are close enough (see sigmaColor).
         clahe_clip_limit: Contrast limit for CLAHE.
         clahe_tile_grid_size: Tile grid size for CLAHE.
 
@@ -58,8 +70,10 @@ def preprocess(img: np.ndarray, bit_depth: int,
        if len(img_norm.shape) > 2: img_norm = cv2.cvtColor(img_norm, cv2.COLOR_BGR2GRAY)
        if img_norm.dtype != np.uint8: img_norm = cv2.normalize(img_norm, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
 
-    ksize = gaussian_ksize // 2 * 2 + 1 # Ensure odd
-    img_blur = cv2.GaussianBlur(img_norm, (ksize, ksize), 0)
+    img_blur = cv2.bilateralFilter(img_norm,
+                                   d=bilateral_d,
+                                   sigmaColor=bilateral_sigmaColor,
+                                   sigmaSpace=bilateral_sigmaSpace)
 
     try:
         clahe = cv2.createCLAHE(clipLimit=clahe_clip_limit, tileGridSize=clahe_tile_grid_size)
