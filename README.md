@@ -36,7 +36,7 @@ This project implements and optimizes a classical computer vision pipeline for s
 ## Project Structure
 
 ```
-your_project_directory/
+Project-HeatSeeker/
 ├── config.py                   # PipelineConfig class
 ├── data_loader_mot.py          # DatasetLoader class
 ├── preprocessing.py            # Preprocessing functions (normalize, bilateral, clahe)
