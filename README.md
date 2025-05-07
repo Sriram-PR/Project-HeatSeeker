@@ -65,10 +65,10 @@ your_project_directory/
 
 ### Installation
 
-1.  **Clone the repository (if applicable):**
+1.  **Clone the repository:**
     ```bash
-    git clone <your-repository-url>
-    cd <your-project-directory>
+    git clone https://github.com/Sriram-PR/Project-HeatSeeker.git
+    cd Project-HeatSeeker
     ```
 
 2.  **Create a virtual environment (recommended):**
