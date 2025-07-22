@@ -1,49 +1,59 @@
+import glob
+import os
+
 import cv2
 import numpy as np
-import os
-import glob
 
 # --- Configuration ---
-DATASET_BASE_PATH = r'./data/ltir_v1_0_8bit_16bit'
+DATASET_BASE_PATH = r"./data/ltir_v1_0_8bit_16bit"
 
 # --- Utility Functions ---
+
 
 def get_sequence_frames(base_path, sequence_name):
     """Gets a sorted list of frame image paths for a given sequence."""
     sequence_path = os.path.join(base_path, sequence_name)
     # Look specifically for .png files to avoid other files if any
-    frames_pattern = os.path.join(sequence_path, '*.png')
-    frame_paths = sorted(glob.glob(frames_pattern)) # glob finds files matching pattern
-                                                    # sorted ensures correct order
+    frames_pattern = os.path.join(sequence_path, "*.png")
+    frame_paths = sorted(glob.glob(frames_pattern))  # glob finds files matching pattern
+    # sorted ensures correct order
     if not frame_paths:
-        print(f"Warning: No PNG frames found for sequence '{sequence_name}' at {sequence_path}")
+        print(
+            f"Warning: No PNG frames found for sequence '{sequence_name}' at {sequence_path}"
+        )
     return frame_paths
+
 
 def parse_ground_truth(base_path, sequence_name):
     """Parses the groundtruth.txt file for a sequence."""
-    gt_path = os.path.join(base_path, sequence_name, 'groundtruth.txt')
-    ground_truth_boxes_corners = [] # Store the raw 8 corner coords
+    gt_path = os.path.join(base_path, sequence_name, "groundtruth.txt")
+    ground_truth_boxes_corners = []  # Store the raw 8 corner coords
     try:
-        with open(gt_path, 'r') as f:
+        with open(gt_path, "r") as f:
             for line in f:
                 # Split the line by comma and convert to float
-                coords = list(map(float, line.strip().split(',')))
+                coords = list(map(float, line.strip().split(",")))
                 if len(coords) == 8:
                     ground_truth_boxes_corners.append(coords)
                 else:
                     # Handle potential special cases from VOT format if needed (e.g., skipped frames)
                     # For now, just warn about unexpected lines
-                    print(f"Warning: Unexpected line format in {gt_path}: {line.strip()}")
+                    print(
+                        f"Warning: Unexpected line format in {gt_path}: {line.strip()}"
+                    )
     except FileNotFoundError:
-        print(f"Error: groundtruth.txt not found for sequence '{sequence_name}' at {gt_path}")
+        print(
+            f"Error: groundtruth.txt not found for sequence '{sequence_name}' at {gt_path}"
+        )
         return None
     return ground_truth_boxes_corners
+
 
 def convert_corners_to_bbox(corners):
     """Converts 8 corner coordinates [x1, y1, ..., y4] to [x_min, y_min, width, height]."""
     if not isinstance(corners, (list, tuple)) or len(corners) != 8:
         print(f"Warning: Invalid input for corner conversion: {corners}")
-        return None # Invalid input
+        return None  # Invalid input
 
     try:
         # Extract x and y coordinates
@@ -60,7 +70,12 @@ def convert_corners_to_bbox(corners):
         height = max(0.0, y_max - y_min)
 
         # Return as integers, as typically used for bounding boxes in OpenCV drawing
-        return int(round(x_min)), int(round(y_min)), int(round(width)), int(round(height))
+        return (
+            int(round(x_min)),
+            int(round(y_min)),
+            int(round(width)),
+            int(round(height)),
+        )
     except Exception as e:
         print(f"Error converting corners {corners}: {e}")
         return None
@@ -73,41 +88,55 @@ def load_frame(frame_path):
 
     if frame is None:
         print(f"Error: Failed to load frame '{frame_path}'")
-        return None, None # Return frame and bit depth
+        return None, None  # Return frame and bit depth
 
     # Check the depth
     if frame.dtype == np.uint8:
         bit_depth = 8
         if len(frame.shape) == 2:
-             pass
+            pass
         elif len(frame.shape) == 3 and frame.shape[2] == 3:
-             print(f"Warning: Frame {frame_path} loaded as color, converting to grayscale.")
-             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            print(
+                f"Warning: Frame {frame_path} loaded as color, converting to grayscale."
+            )
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         else:
-             print(f"Warning: Unexpected shape for 8-bit image {frame_path}: {frame.shape}")
+            print(
+                f"Warning: Unexpected shape for 8-bit image {frame_path}: {frame.shape}"
+            )
 
     elif frame.dtype == np.uint16:
         bit_depth = 16
         if len(frame.shape) != 2:
-             print(f"Warning: Expected 16-bit image {frame_path} to be grayscale, but shape is {frame.shape}")
+            print(
+                f"Warning: Expected 16-bit image {frame_path} to be grayscale, but shape is {frame.shape}"
+            )
     else:
-        print(f"Warning: Unsupported dtype {frame.dtype} for frame '{frame_path}'. Attempting grayscale load.")
+        print(
+            f"Warning: Unsupported dtype {frame.dtype} for frame '{frame_path}'. Attempting grayscale load."
+        )
         frame = cv2.imread(frame_path, cv2.IMREAD_GRAYSCALE)
         if frame is None:
-             print(f"Error: Fallback grayscale load failed for '{frame_path}'")
-             return None, None
+            print(f"Error: Fallback grayscale load failed for '{frame_path}'")
+            return None, None
         bit_depth = 8
 
     return frame, bit_depth
 
+
 if __name__ == "__main__":
     # 1. Choose a sequence to test
-    test_sequence_name = '8_car' # Change this to test other sequences
+    test_sequence_name = "8_car"  # Change this to test other sequences
     print(f"--- Testing Sequence: {test_sequence_name} ---")
 
-    if 'PASTE_YOUR_FULL_LTIR_DATASET_PATH_HERE' in DATASET_BASE_PATH or not os.path.isdir(DATASET_BASE_PATH):
-         print("ERROR: Please set the DATASET_BASE_PATH variable in the eda.py script to your actual dataset location!")
-         exit()
+    if (
+        "PASTE_YOUR_FULL_LTIR_DATASET_PATH_HERE" in DATASET_BASE_PATH
+        or not os.path.isdir(DATASET_BASE_PATH)
+    ):
+        print(
+            "ERROR: Please set the DATASET_BASE_PATH variable in the eda.py script to your actual dataset location!"
+        )
+        exit()
 
     # 2. Get frame paths
     frame_paths = get_sequence_frames(DATASET_BASE_PATH, test_sequence_name)
@@ -124,16 +153,18 @@ if __name__ == "__main__":
 
     # Check if number of ground truth entries matches frames
     if len(gt_corners_list) != len(frame_paths):
-        print(f"Warning: Number of ground truth entries ({len(gt_corners_list)}) "
-              f"does not match number of frames ({len(frame_paths)}).")
+        print(
+            f"Warning: Number of ground truth entries ({len(gt_corners_list)}) "
+            f"does not match number of frames ({len(frame_paths)})."
+        )
         min_len = min(len(frame_paths), len(gt_corners_list))
         frame_paths = frame_paths[:min_len]
         gt_corners_list = gt_corners_list[:min_len]
         print(f"Processing the first {min_len} frames/GT entries.")
 
     if not frame_paths:
-         print("No frames left to process after aligning with ground truth.")
-         exit()
+        print("No frames left to process after aligning with ground truth.")
+        exit()
 
     print(f"Found {len(gt_corners_list)} ground truth entries aligned with frames.")
 
@@ -148,7 +179,7 @@ if __name__ == "__main__":
 
     # 5. Get the FIRST ground truth box
     first_gt_corners = gt_corners_list[0]
-    first_gt_bbox = convert_corners_to_bbox(first_gt_corners) # (x, y, w, h) format
+    first_gt_bbox = convert_corners_to_bbox(first_gt_corners)  # (x, y, w, h) format
 
     if first_gt_bbox is None:
         print("Error converting first ground truth corners to bbox.")
@@ -161,22 +192,34 @@ if __name__ == "__main__":
     if len(first_frame.shape) == 2:
         if detected_bit_depth == 16:
             print("Normalizing 16-bit frame for display.")
-            normalized_frame = cv2.normalize(first_frame, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+            normalized_frame = cv2.normalize(
+                first_frame, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U
+            )
             display_frame = cv2.cvtColor(normalized_frame, cv2.COLOR_GRAY2BGR)
         else:
             display_frame = cv2.cvtColor(first_frame, cv2.COLOR_GRAY2BGR)
     elif len(first_frame.shape) == 3:
-         print("Warning: Frame appears to be color, displaying as is.")
-         display_frame = first_frame.copy()
+        print("Warning: Frame appears to be color, displaying as is.")
+        display_frame = first_frame.copy()
     else:
-         print("Error: Cannot determine frame format for display.")
-         exit()
+        print("Error: Cannot determine frame format for display.")
+        exit()
 
     # 7. Draw the bounding box on the display frame
     if display_frame is not None and first_gt_bbox is not None:
         x, y, w, h = first_gt_bbox
-        cv2.rectangle(display_frame, (x, y), (x + w, y + h), (0, 255, 0), 2) # Green box, thickness 2
-        cv2.putText(display_frame, 'Ground Truth', (x, y - 10 if y>10 else y+10 ), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+        cv2.rectangle(
+            display_frame, (x, y), (x + w, y + h), (0, 255, 0), 2
+        )  # Green box, thickness 2
+        cv2.putText(
+            display_frame,
+            "Ground Truth",
+            (x, y - 10 if y > 10 else y + 10),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.5,
+            (0, 255, 0),
+            1,
+        )
 
         # 8. Display the frame
         cv2.imshow(f"First Frame - {test_sequence_name}", display_frame)

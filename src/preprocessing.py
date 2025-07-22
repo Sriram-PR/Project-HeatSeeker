@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 
+
 def normalize_image(img: np.ndarray, bit_depth: int) -> np.ndarray | None:
     """
     Normalizes an image to 8-bit grayscale [0, 255].
@@ -20,11 +21,15 @@ def normalize_image(img: np.ndarray, bit_depth: int) -> np.ndarray | None:
     if bit_depth == 16:
         min_val, max_val = img.min(), img.max()
         if max_val > min_val:
-             img = cv2.normalize(img, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
-        elif max_val == min_val: # Handle flat image
-             img = np.full_like(img, int(255.0 * min_val / 65535.0) if min_val > 0 else 0, dtype=np.uint8)
+            img = cv2.normalize(img, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+        elif max_val == min_val:  # Handle flat image
+            img = np.full_like(
+                img,
+                int(255.0 * min_val / 65535.0) if min_val > 0 else 0,
+                dtype=np.uint8,
+            )
         else:
-             img = np.zeros_like(img, dtype=np.uint8)
+            img = np.zeros_like(img, dtype=np.uint8)
 
     if len(img.shape) > 2 and img.shape[2] > 1:
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -32,12 +37,16 @@ def normalize_image(img: np.ndarray, bit_depth: int) -> np.ndarray | None:
         img = np.clip(img, 0, 255).astype(np.uint8)
     return img
 
-def preprocess(img: np.ndarray, bit_depth: int,
-               bilateral_d: int,
-               bilateral_sigmaColor: float,
-               bilateral_sigmaSpace: float,
-               clahe_clip_limit: float,
-               clahe_tile_grid_size: tuple[int, int]) -> np.ndarray | None:
+
+def preprocess(
+    img: np.ndarray,
+    bit_depth: int,
+    bilateral_d: int,
+    bilateral_sigmaColor: float,
+    bilateral_sigmaSpace: float,
+    clahe_clip_limit: float,
+    clahe_tile_grid_size: tuple[int, int],
+) -> np.ndarray | None:
     """
     Applies a preprocessing pipeline: Normalize -> Bilateral Filter -> CLAHE.
 
@@ -66,20 +75,30 @@ def preprocess(img: np.ndarray, bit_depth: int,
         return None
 
     if len(img_norm.shape) > 2 or img_norm.dtype != np.uint8:
-       print("Warning: Image not 8-bit grayscale after normalization, attempting conversion.")
-       if len(img_norm.shape) > 2: img_norm = cv2.cvtColor(img_norm, cv2.COLOR_BGR2GRAY)
-       if img_norm.dtype != np.uint8: img_norm = cv2.normalize(img_norm, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+        print(
+            "Warning: Image not 8-bit grayscale after normalization, attempting conversion."
+        )
+        if len(img_norm.shape) > 2:
+            img_norm = cv2.cvtColor(img_norm, cv2.COLOR_BGR2GRAY)
+        if img_norm.dtype != np.uint8:
+            img_norm = cv2.normalize(
+                img_norm, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U
+            )
 
-    img_blur = cv2.bilateralFilter(img_norm,
-                                   d=bilateral_d,
-                                   sigmaColor=bilateral_sigmaColor,
-                                   sigmaSpace=bilateral_sigmaSpace)
+    img_blur = cv2.bilateralFilter(
+        img_norm,
+        d=bilateral_d,
+        sigmaColor=bilateral_sigmaColor,
+        sigmaSpace=bilateral_sigmaSpace,
+    )
 
     try:
-        clahe = cv2.createCLAHE(clipLimit=clahe_clip_limit, tileGridSize=clahe_tile_grid_size)
+        clahe = cv2.createCLAHE(
+            clipLimit=clahe_clip_limit, tileGridSize=clahe_tile_grid_size
+        )
         img_clahe = clahe.apply(img_blur)
     except cv2.error as e:
-         print(f"Error applying CLAHE: {e}. Returning blurred image.")
-         return img_blur
+        print(f"Error applying CLAHE: {e}. Returning blurred image.")
+        return img_blur
 
     return img_clahe

@@ -1,23 +1,30 @@
 import numpy as np
-from filterpy.kalman import UnscentedKalmanFilter as UKF
 from filterpy.kalman import MerweScaledSigmaPoints
+from filterpy.kalman import UnscentedKalmanFilter as UKF
+
 from config import PipelineConfig
+
 
 # ========== UKF State Transition and Measurement Functions ==========
 def fx(x: np.ndarray, dt: float) -> np.ndarray:
     """State transition function (fx) for a constant velocity model."""
-    return np.array([x[0] + x[2]*dt, x[1] + x[3]*dt, x[2], x[3]])
+    return np.array([x[0] + x[2] * dt, x[1] + x[3] * dt, x[2], x[3]])
+
 
 def hx(x: np.ndarray) -> np.ndarray:
     """Measurement function (hx) - measures position only."""
     return x[:2]
 
+
 # ========== UKF Track Class ==========
 class UKFTrack:
     """Represents a single tracked object using an Unscented Kalman Filter (UKF)."""
-    count = 0 # Static variable for unique IDs (if needed, currently managed by MultiObjectTracker)
 
-    def __init__(self, x: int, y: int, track_id: int, config: PipelineConfig, dt: float = 1.0):
+    count = 0  # Static variable for unique IDs (if needed, currently managed by MultiObjectTracker)
+
+    def __init__(
+        self, x: int, y: int, track_id: int, config: PipelineConfig, dt: float = 1.0
+    ):
         """
         Initializes a new track with a UKF filter.
 
@@ -28,17 +35,20 @@ class UKFTrack:
             config: The pipeline configuration object (for noise parameters R, Q).
             dt: Time step (typically 1.0 frame).
         """
-        sp = MerweScaledSigmaPoints(n=4, alpha=.1, beta=2., kappa=-1)
+        sp = MerweScaledSigmaPoints(n=4, alpha=0.1, beta=2.0, kappa=-1)
         self.ukf = UKF(dim_x=4, dim_z=2, dt=dt, hx=hx, fx=fx, points=sp)
-        self.ukf.x = np.array([x, y, 0., 0.])
-        self.ukf.P = np.diag([100., 100., 50., 50.]) # Initial state uncertainty
-        self.ukf.R = np.diag([config.R, config.R])   # Measurement noise
-        self.ukf.Q = np.diag([config.Q, config.Q, config.Q/2, config.Q/2]) # Process noise
+        self.ukf.x = np.array([x, y, 0.0, 0.0])
+        self.ukf.P = np.diag([100.0, 100.0, 50.0, 50.0])  # Initial state uncertainty
+        self.ukf.R = np.diag([config.R, config.R])  # Measurement noise
+        self.ukf.Q = np.diag(
+            [config.Q, config.Q, config.Q / 2, config.Q / 2]
+        )  # Process noise
 
         self.id: int = track_id
         self.misses: int = 0
         self.age: int = 1
-        self.color: tuple[int, int, int] = tuple(np.random.randint(0, 255, 3).tolist())
+        rng = np.random.default_rng()
+        self.color: tuple[int, int, int] = tuple(rng.integers(0, 255, size=3).tolist())
         self.last_box: tuple[int, int, int, int] | None = None
 
     def predict(self) -> np.ndarray:
